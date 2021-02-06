@@ -7,7 +7,7 @@
     "sourceMap": true,
     "target": "es6",
     "rootDir": "src/.",
-    "outDir": "./build",
+    "outDir": "TheUpdate/build",
     "declaration": true,
     "strictNullChecks": true,
     "moduleResolution": "node",
