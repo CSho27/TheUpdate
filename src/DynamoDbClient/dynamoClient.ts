@@ -1,5 +1,5 @@
 import AWS from 'aws-sdk';
-import { TableDefinition } from './tableDefinition'
+import { DynamoKey, TableDefinition } from './tableDefinition'
 
 // This needs moved somewhere more permanent at some point
 const AWS_CONFIG = {
@@ -8,9 +8,10 @@ const AWS_CONFIG = {
   secretAccessKey: "F0dh9/w+fljuVtESabMnAqHtAnYRaliHVrnf97f1"
 }
 
-export interface Table<KeyType> {
-  tableName: string;
-}
+type SuccessResponse = { success: true, output: AWS.DynamoDB.DocumentClient.PutItemOutput }
+type FailureResponse = { success: false; errorMessage: string }
+
+export type InsertResponse = SuccessResponse | FailureResponse;
 
 export class DynamoDbClient {
   private readonly dynamoClient: AWS.DynamoDB.DocumentClient;
@@ -20,7 +21,7 @@ export class DynamoDbClient {
     this.dynamoClient = new AWS.DynamoDB.DocumentClient();
   }
 
-  getItem<T,K extends string|number|Blob>(tableDefinition: TableDefinition<T,K>, key: K): Promise<T | null> {
+  getItem<T,K extends DynamoKey>(tableDefinition: TableDefinition<T,K>, key: K): Promise<T | null> {
     return new Promise((resolve, reject) => {
       if(typeof key === 'string' && isNullOrWhitespace(key))
         return resolve(null);
@@ -41,6 +42,47 @@ export class DynamoDbClient {
       }
 
       this.dynamoClient.get(queryParams, callback);
+    })
+  }
+
+  insertItem<T,K extends DynamoKey>(tableDefinition: TableDefinition<T,K>, item: T): Promise<InsertResponse> {
+    return new Promise((resolve, reject) => {
+      const keyValue: K = (item as any)[tableDefinition.keyName];
+      if(!keyValue)
+        return resolve({
+          success: false,
+          errorMessage: `item is missing ${tableDefinition.tableName}'s key property: ${tableDefinition.keyName}`
+        });
+
+      this.getItem<T,K>(tableDefinition, keyValue).then(retrievedItem => {
+        if(!!retrievedItem)
+          return resolve({
+            success: false,
+            errorMessage: `an item with the key "${tableDefinition.keyName}=${keyValue}" already exists in table "${tableDefinition.tableName}"`
+          })
+
+        const insertParams: AWS.DynamoDB.DocumentClient.PutItemInput = {
+          TableName: tableDefinition.tableName,
+          Item: item
+        };
+
+        var callback = (error: AWS.AWSError, data: AWS.DynamoDB.PutItemOutput) => {
+          if(!!error){
+            resolve({
+              ...data,
+              success: false,
+              errorMessage: error.message
+            })
+          } else {
+            resolve({
+              success: true,
+              output: data
+            })
+          }
+        }
+
+        this.dynamoClient.put(insertParams, callback);
+      })
     })
   }
 }

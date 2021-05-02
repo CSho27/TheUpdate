@@ -13,6 +13,5 @@ export function TextField(props: TextFieldProps){
   return <input
       className={`text-field ${props.className}`}
       value={props.value ?? ''}
-      onChange={onChange}>
-  </input>
+      onChange={onChange}/>
 }

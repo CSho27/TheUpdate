@@ -4,6 +4,7 @@ import './Content/styles.css';
 import { AppStateReducer, INITIAL_APP_STATE } from './appState';
 import { LoginPage } from './LoginPage/loginPage';
 import { DynamoDbClient } from './DynamoDbClient/dynamoClient';
+import { HomePage } from './HomePage/homePage';
 
 function App() {
   const [state, update] = useReducer(AppStateReducer, INITIAL_APP_STATE);
@@ -15,7 +16,12 @@ function App() {
         dynamoClient={dynamoClient}
         updateAppState={update}/>
     case 'Home':
-      return <div className='App'>Welcome {state.user?.username}</div>;
+      if(!state.user)
+        throw 'User must be set to navigate to home page';
+
+      return <HomePage 
+        user={state.user}
+      />
     default:
       return <h1>This page has not been configured</h1>;
   }

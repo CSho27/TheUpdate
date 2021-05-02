@@ -8,7 +8,7 @@ export interface AppState {
 }
 
 export type AppStateAction =
-| { type: 'logIn', user: User }
+| { type: 'login', user: User }
 | { type: 'changePage', page: Page } 
 
 export function AppStateReducer(state: AppState, action: AppStateAction): AppState {
@@ -18,7 +18,7 @@ export function AppStateReducer(state: AppState, action: AppStateAction): AppSta
         ...state,
         page: action.page
       }
-    case 'logIn':
+    case 'login':
       return {
         ...state,
         user: action.user,
