@@ -1,0 +1,21 @@
+.text-field {
+  display: block;
+  width: 100%;
+  margin-top: .3em;
+}
+
+.error-list {
+  background-color: #d6acac;
+  color: #9c0606;
+  list-style: none;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: .5em;
+  padding-bottom: .5em;
+  font-size: 80%;
+  text-align: left;
+}
+
+.margin-bottom {
+  margin-bottom: .5em;
+}

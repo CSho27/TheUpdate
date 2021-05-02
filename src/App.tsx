@@ -1,26 +1,24 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useReducer } from 'react';
+import './Content/App.css';
+import './Content/styles.css';
+import { AppStateReducer, INITIAL_APP_STATE } from './appState';
+import { LoginPage } from './LoginPage/loginPage';
+import { DynamoDbClient } from './DynamoDbClient/dynamoClient';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [state, update] = useReducer(AppStateReducer, INITIAL_APP_STATE);
+  const dynamoClient = new DynamoDbClient();
+
+  switch(state.page){
+    case 'Login':
+      return <LoginPage 
+        dynamoClient={dynamoClient}
+        updateAppState={update}/>
+    case 'Home':
+      return <div className='App'>Welcome {state.user?.username}</div>;
+    default:
+      return <h1>This page has not been configured</h1>;
+  }
 }
 
 export default App;
