@@ -36,14 +36,15 @@ export function HomePage(props: HomePageProps) {
     if(!!state.recordedAudio){
       var audioContext = new AudioContext();
 
+      var playDecodedAudio = (audioBuf: AudioBuffer) => {
+        var source = audioContext.createBufferSource();
+        source.buffer = audioBuf;
+        source.connect(audioContext.destination);
+        source.start();
+      }
+
       state.recordedAudio.arrayBuffer()
-        .then(arrayBuf => audioContext.decodeAudioData(arrayBuf))
-        .then(audioBuf => {
-          var source = audioContext.createBufferSource();
-          source.buffer = audioBuf;
-          source.connect(audioContext.destination);
-          source.start();
-        });
+        .then(arrayBuf => audioContext.decodeAudioData(arrayBuf, playDecodedAudio))
     }
 
   }
